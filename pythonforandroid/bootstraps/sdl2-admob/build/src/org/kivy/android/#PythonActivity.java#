@@ -1,13 +1,8 @@
 
 package org.kivy.android;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
-import com.google.ads.mediation.admob.AdMobAdapter;
 
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -20,11 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
-import android.view.View;
-import android.view.Gravity;
-import android.os.Handler;
-import android.os.Message;
-import android.widget.FrameLayout;
 import android.view.ViewGroup;
 import android.view.SurfaceView;
 import android.app.Activity;
@@ -57,7 +47,7 @@ import org.renpy.android.AssetExtract;
 
 
 public class PythonActivity extends SDLActivity {
-
+    
     private static final String TAG = "PythonActivity";
 
     public static PythonActivity mActivity = null;
@@ -65,102 +55,6 @@ public class PythonActivity extends SDLActivity {
     private ResourceManager resourceManager = null;
     private Bundle mMetaData = null;
     private PowerManager.WakeLock mWakeLock = null;
-
-    /* KivMob backend starts here. */
-    private static AdView adView = null;
-    private static InterstitialAd interstitialAd = null;
-    private static ArrayList<String> testDevices = new ArrayList<String>();
-    public static enum AdCmd { INIT_ADS,
-                               ADD_TEST_DEVICE,
-                               NEW_BANNER,
-                               NEW_INTERSTITIAL,
-                               REQ_BANNER,
-                               REQ_INTERSTITIAL,
-                               SHOW_BANNER,
-                               SHOW_INTERSTITIAL,
-                               HIDE_BANNER
-                             };
-
-    // Handles all comunication to ad threads.
-    public static Handler adHandler = new Handler() {
-	@Override
-	public void handleMessage(Message msg) {
-            AdRequest.Builder builder = new AdRequest.Builder();
-	    switch (AdCmd.values()[msg.what]) {
-                case INIT_ADS:
-                    MobileAds.initialize(mActivity, msg.getData().getString("appID"));
-                    break;
-                case ADD_TEST_DEVICE:
-                    testDevices.add(msg.getData().getString("deviceID"));
-                    break;
-                case NEW_BANNER:
-                    FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL);
-                    adView = new AdView(mActivity);
-                    adView.setAdSize(AdSize.SMART_BANNER);
-                    adView.setAdUnitId(msg.getData().getString("unitID"));
-                    adView.setLayoutParams(lp);
-                    adView.setVisibility(View.GONE);
-                    adView.setAdListener(new AdListener() {});
-                    ViewGroup layout = getLayout();
-                    layout.addView(adView);
-                    break;
-                case NEW_INTERSTITIAL:
-                    interstitialAd = new InterstitialAd(mActivity);
-                    interstitialAd.setAdUnitId(msg.getData().getString("unitID"));
-                    interstitialAd.setAdListener(new AdListener() {
-                        @Override
-                        public void onAdClosed() {
-                
-                        }
-                    });
-                    break;
-                case REQ_BANNER: 
-                    for (String device : testDevices) {
-                        builder.addTestDevice(device);
-                    }
-                    builder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
-                    AdRequest bannRequest = builder.build();
-                    adView.loadAd(bannRequest);
-                    break;
-                case REQ_INTERSTITIAL:
-                    if (msg.getData().containsKey("child")) {
-                        builder.tagForChildDirectedTreatment(msg.getData().getBoolean("child"));
-                    }
-                    if (msg.getData().containsKey("family")) { 
-                        Bundle extras = new Bundle();
-                        extras.putBoolean("is_designed_for_families",
-                            msg.getData().getBoolean("family"));
-                        builder.addNetworkExtrasBundle(AdMobAdapter.class, extras);
-                    }
-                    builder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
-                    for (String device : testDevices) {
-                        builder.addTestDevice(device);
-                    }
-                    AdRequest interRequest = builder.build();
-                    interstitialAd.loadAd(interRequest);
-                    break;
-		case SHOW_BANNER:
-                    adView.setVisibility(View.VISIBLE);
-		    break;
-                case SHOW_INTERSTITIAL:
-                    if (interstitialAd.isLoaded()) { interstitialAd.show(); }
-                    break;
-                case HIDE_BANNER:
-                    adView.setVisibility(View.GONE);
-                    break;
-                default:
-                    break;
-	    }
-	}
-    };
-
-    public static boolean isLoaded() {
-        return interstitialAd.isLoaded();
-    }
-    /* End of KivMob code. */
 
     public String getAppRoot() {
         String app_root =  getFilesDir().getAbsolutePath() + "/app";
@@ -556,7 +450,6 @@ public class PythonActivity extends SDLActivity {
     }
 
     if (mLayout == null) {
-
       setContentView(mImageView);
     } else if (PythonActivity.mImageView.getParent() == null){
       mLayout.addView(mImageView);
