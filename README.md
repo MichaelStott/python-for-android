@@ -1,6 +1,6 @@
-# python-for-android-admob
+NOTE: This is no longer in active development, as the library this was designed for no longer requires a custom P4A backend.
 
-Developing...
+# python-for-android-admob
 
 # License
 
